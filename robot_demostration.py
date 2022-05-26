@@ -1,15 +1,16 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 from adafruit_servokit import ServoKit
 kit = ServoKit(channels=16)
 kit.servo[0].actuation_range = 180
 import time
+
 
 # initalizing all the servo position encoder global variables
 # this allow us to keep track of what is the encoder value at all times
 servo_position_arr = [0 ,0 ,0 ,0 ,0 ,0]
 
 # every time the robot starts all the servo move to the rest position
-# by starting off with a known position we can use the encoders on the motors to use the motion smoothening algorythm 
+# by starting off with a known position we can use the encoders on the motors to use the motion smoothening algorithm 
 def initalization():
     kit.servo[0].angle = 90
     time.sleep(0.5)
@@ -23,34 +24,81 @@ def initalization():
     time.sleep(0.5)
     kit.servo[5].angle = 90
     time.sleep(0.5)
-    for x in range (0,6):
+    for x in range(0,6):
        servo_position_arr[x] = 90
-
+    print("All the servos have been initilized to 90 degrees: ", servo_position_arr)
 
 
 # Video of jerky motion (cycling through the motions )
+def jerky_motion():
+
+    #pose 1
+    for y in range(0,6):
+        kit.servo[y].angle = 180
+        time.sleep(0.5)
+
+    time.sleep(1)
+    
+    #pose 2
+    kit.servo[0].angle = 0
+    time.sleep(0.5)
+    kit.servo[1].angle = 40
+    time.sleep(0.5)
+    kit.servo[2].angle = 40 
+    time.sleep(0.5)
+    kit.servo[3].angle = 0
+    time.sleep(0.5)
+    kit.servo[4].angle = 180
+    time.sleep(0.5)
+    kit.servo[5].angle = 0
+    time.sleep(1)
+    
+    #pose 3
+    kit.servo[0].angle = 180
+    time.sleep(0.5)
+    kit.servo[1].angle = 40
+    time.sleep(0.5)
+    kit.servo[2].angle = 160
+    time.sleep(0.5)
+    kit.servo[3].angle = 180
+    time.sleep(0.5)
+    kit.servo[4].angle = 0
+    time.sleep(0.5)
+    kit.servo[5].angle = 180
+    time.sleep(1)
+
+def no_jerky_motion():
+    extra_smooth(180,180,180,180,180,180)
+    time.sleep(1)
+    extra_smooth(0,40,40,0,180,0)
+    time.sleep(1)
+    extra_smooth(180,40,160,0,180,180)
+    time.sleep(1)
 
 
-# Encoder values changing in real time demo (cycling through one motor only )
-
-
-
-# Collision w/o extra smooth (Jerky motion) (highlight just one pose within motions)
+# Collision demo
 def collision():
-    kit.servo[0].angle = 0 
-    time.sleep(0.2)
-    kit.servo[1].angle = 0
+    kit.servo[1].angle = 155 
     time.sleep(0.2)
     kit.servo[2].angle = 0
+    time.sleep(0.2)
+    kit.servo[0].angle = 0
     time.sleep(0.2)
     kit.servo[3].angle = 0
     time.sleep(0.2)
     kit.servo[4].angle = 180
+    time.sleep(0.2)
+    kit.servo[5].angle = 0
+    time.sleep(1)
+# no collision 
+def no_collision():
+    extra_smooth(0,155,0,0,180,0)
+    time.sleep(1)
+    
 
 
-# no Collision w extra smooth cycling through the motions
-
-
+# Encoder values changing in real time demo (cycling throught the encoder values)
+    #I think All I need to do is to uncomment "print(servo_position_arr)"
 
 # motion smoothening function that increments or decrements the value from the current encoder value to new value, then updates the encoder value with final value
 def extra_smooth(final_position0, final_position1, final_position2, final_position3, final_position4, final_position5): 
@@ -66,11 +114,12 @@ def extra_smooth(final_position0, final_position1, final_position2, final_positi
                 servo_position_arr[x] += inc 
                 kit.servo[x].angle = servo_position_arr[x] 
                 time.sleep(sleep)
-                #print(servo_position_arr)
+                print(servo_position_arr)
             elif servo_position_arr[x] > final_position[x]:  
                 servo_position_arr[x] -= inc 
                 kit.servo[x].angle = servo_position_arr[x] 
                 time.sleep(sleep) 
+                print(servo_position_arr)
             else:
                 colors[x] = True
 
@@ -81,29 +130,15 @@ def extra_smooth(final_position0, final_position1, final_position2, final_positi
             print("Final position saved: ", servo_position_arr)
 
 def main():
+    initalization()
+    #jerky_motion()
+    #initalization()
+    no_jerky_motion()
     
-    initalization()
-    print("this is the initalized array ", servo_position_arr)
-#    collision()
-'''
-    # same motion but smoother using the extra smoothening function
-    initalization()
-    print("this is the initalized array ", servo_position_arr)
-    time.sleep(1)
-    extra_smooth(0,0,0,0,180)
-    time.sleep(5)
-
-    ## encoder values demonstration
-    initalization()
-    print("this is the initalized array ", servo_position_arr)
-    time.sleep(1)
-    extra_smooth(180,40,160,180,0)
-    time.sleep(1)
-    extra_smooth(90,140,90,90,90)
-    ## continue to work on this
-'''
-
-
-
+    #collision()
+    #initalization()
+    #no_collision()
+    
 if __name__=="__main__":
     main()
+
